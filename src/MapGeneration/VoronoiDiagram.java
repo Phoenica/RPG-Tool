@@ -9,8 +9,6 @@ public class VoronoiDiagram {
     public final int ySize;
     public Point[][] pixelPoints;
     public ArrayList<Polygon> polygons;
-    public ArrayList<Edge> edges;
-    public ArrayList<Vertex> vertexes;
     private Point [] directions = {new Point(-1,0), new Point(0,-1)};
     public VoronoiDiagram(int x, int y)
     {
@@ -21,11 +19,7 @@ public class VoronoiDiagram {
     {
         pixelPoints = new Point[xSize][ySize];
         polygons = generateCentralPoints(polyCount);
-        edges = new ArrayList<>();
-        vertexes = new ArrayList<>();
         generateVoronoiPixelDiagram();
-
-
     }
 
 

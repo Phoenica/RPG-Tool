@@ -20,9 +20,24 @@ public class Screen extends JPanel {
         {
             for(MapGeneration.Graph.Polygon polygon: diagram.polygons)
             {
-                if(polygon.water == WaterType.Ocean) g.setColor(Color.blue);
-                else if(polygon.water == WaterType.Lake) g.setColor(Color.cyan);
-                else g.setColor(Color.GREEN);
+                if(polygon.water == WaterType.Ocean) g.setColor(new Color(0,0,153));
+                else if(polygon.water == WaterType.Lake) g.setColor(Color.blue);
+                else if(polygon.elevation == 1)
+                {
+                    g.setColor(Color.GREEN);
+                }
+                else if(polygon.elevation == 2)
+                {
+                    g.setColor(Color.yellow);
+                }
+                else if(polygon.elevation == 3)
+                {
+                    g.setColor(Color.GRAY);
+                }
+                else if(polygon.elevation == 4)
+                {
+                    g.setColor(Color.red);
+                }
                 for(Point pixel:polygon.polygonPixels)
                 {
                     g.drawRect(pixel.getX(),pixel.getY(),1,1);

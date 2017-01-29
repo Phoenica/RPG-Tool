@@ -24,6 +24,7 @@ public class Map {
         diagram = new VoronoiDiagram(settings.getXSize(),settings.getYSize());
         diagram.generate(settings.getPolygons());
         createBodiesOfWater();
+        generateElevations();
         generatedMap = new Screen(diagram);
     }
 
@@ -34,6 +35,61 @@ public class Map {
     }
 
 
+
+    private void generateElevations() {
+        Queue<Polygon> polygonQueue = new ArrayDeque<>();
+        Set<Polygon> polygonSet = new HashSet<>();
+        getCoastPolygons(polygonQueue, polygonSet);
+        calculatePolygonsDistanceToOcean(polygonQueue, polygonSet);
+        setElevations(polygonSet);
+    }
+
+    private void setElevations(Set<Polygon> polygonSet) {
+        int maxDistance = 0;
+        int avargeDistanceToOcean = 0;
+        for(Polygon polygon: polygonSet)
+        {
+            if(polygon.distanceToOcean > maxDistance) maxDistance = polygon.distanceToOcean;
+            avargeDistanceToOcean += polygon.distanceToOcean;
+        }
+        avargeDistanceToOcean = avargeDistanceToOcean / polygonSet.size();
+        for(Polygon polygon: polygonSet)
+        {
+            if(polygon.distanceToOcean <= 2) polygon.elevation = 1;
+            else if(polygon.distanceToOcean < avargeDistanceToOcean+4) polygon.elevation = 2;
+            else if(polygon.distanceToOcean < (maxDistance+5 + avargeDistanceToOcean)/2) polygon.elevation = 3;
+            else polygon.elevation = 4;
+
+        }
+    }
+
+    private void calculatePolygonsDistanceToOcean(Queue<Polygon> polygonQueue, Set<Polygon> polygonSet) {
+        while(!polygonQueue.isEmpty())
+        {
+            Polygon polygon = polygonQueue.poll();
+            for(Polygon polygonNeigbor:polygon.neighborPolygons)
+            {
+                if(!polygonSet.contains(polygonNeigbor))
+                {
+                    polygonNeigbor.distanceToOcean = polygon.distanceToOcean + 1;
+                    polygonQueue.add(polygonNeigbor);
+                    polygonSet.add(polygonNeigbor);
+                }
+            }
+        }
+    }
+
+    private void getCoastPolygons(Queue<Polygon> polygonQueue, Set<Polygon> polygonSet) {
+        for(Polygon polygon: diagram.polygons)
+        {
+            if(polygon.water == WaterType.Land && polygon.hasOceanNeighbour())
+            {
+                polygon.distanceToOcean = 0;
+                polygonQueue.add(polygon);
+                polygonSet.add(polygon);
+            }
+        }
+    }
 
     private void createLakes() {
         Queue<Polygon> polygonQueue = new ArrayDeque<>();
