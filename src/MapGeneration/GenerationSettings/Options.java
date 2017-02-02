@@ -14,6 +14,8 @@ public class Options {
     private double landmassMinPercentage;
     private boolean topWater,bottomWater,leftWater,rightWater;
     private MapPositionOnPlanet climate;
+    private int moistureClimateModificator;
+    private int riverCountModificator;
    // private int moistureModifier();
 
     public Options(int x, int y, int p)
@@ -26,13 +28,15 @@ public class Options {
 
     private void setDefaultVaules()
     {
-        waterLevelConstant = 0.021;
+        waterLevelConstant = 0.018;
         topWater = bottomWater = leftWater = rightWater = true;
         lakeCountModificator = 0;
+        riverCountModificator = 0;
         totalLakeAreaLimitMultipler = 8;
         lakeSizeLimitModificator = 100;
         landmassMinPercentage = 0.30;
         climate = MapPositionOnPlanet.EquatorOnMiddle;
+        moistureClimateModificator = 1;
     }
 
 
@@ -127,5 +131,21 @@ public class Options {
 
     public void setClimate(MapPositionOnPlanet climate) {
         this.climate = climate;
+    }
+
+    public int getMoistureClimateModificator() {
+        return moistureClimateModificator;
+    }
+
+    public void setMoistureClimateModificator(int moistureClimateModificator) {
+        this.moistureClimateModificator = moistureClimateModificator;
+    }
+
+    public int getRiverCountModificator() {
+        return riverCountModificator;
+    }
+
+    public void setRiverCountModificator(int riverCountModificator) {
+        this.riverCountModificator = riverCountModificator;
     }
 }

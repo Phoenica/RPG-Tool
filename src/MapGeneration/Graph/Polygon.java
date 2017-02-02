@@ -1,5 +1,6 @@
 package MapGeneration.Graph;
 
+import MapGeneration.Graph.PolygonProperties.Biomes.Biome;
 import MapGeneration.Graph.PolygonProperties.Elevation;
 import MapGeneration.Graph.PolygonProperties.Moisture;
 import MapGeneration.Graph.PolygonProperties.Temperature;
@@ -15,7 +16,9 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
     public int distanceToOcean;
     public int distanceToLake;
     public Moisture moisture;
-    public Temperature temperature;// 0-100
+    public Temperature temperature;
+    public Biome biome;
+    public boolean river;
 
     public Polygon(int x, int y)
     {
@@ -24,6 +27,8 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
         polygonPixels = new ArrayList<>();
         distanceToOcean = -1;
         elevation = Elevation.Water;
+        distanceToLake = 999;
+        river = false;
     }
     public ArrayList<Point> polygonPixels;
     public ArrayList<Polygon> neighborPolygons;
@@ -41,9 +46,19 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
     public void setPotentialRiverDirection()
     {
         riverDirection = this;
+        if(hasOceanNeighbour())
+        {
+            for(Polygon polygon: neighborPolygons)
+            {
+                if(polygon.water == WaterType.Ocean){
+                    riverDirection = polygon;
+                break;}
+            }
+
+        }
         for(Polygon polygon: neighborPolygons)
         {
-            if(polygon.elevation.ordinal() < riverDirection.elevation.ordinal()) {
+            if(polygon.elevation.ordinal() < riverDirection.elevation.ordinal() && polygon.riverDirection != this) {
                 riverDirection = polygon;
             }
             if(riverDirection.elevation.ordinal() == 0) break;
@@ -52,10 +67,20 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
         {
             for(Polygon polygon: neighborPolygons)
             {
-                if(polygon.distanceToOcean < riverDirection.distanceToOcean) {
+                if(polygon.distanceToOcean < riverDirection.distanceToOcean && polygon.riverDirection != this) {
                     riverDirection = polygon;
                 }
                 if(riverDirection.elevation.ordinal() == 0) break;
+            }
+        }
+        if(riverDirection == this)
+        {
+            for(Polygon polygon: neighborPolygons)
+            {
+                if(polygon.river == true && polygon.riverDirection != this)
+                {
+                    riverDirection = polygon;
+                }
             }
         }
 

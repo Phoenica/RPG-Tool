@@ -33,13 +33,15 @@ public class Map {
     }
 
     private void generateClimate() {
-
-
         for(Polygon polygon: diagram.polygons)
         {
             calculateTemperature(polygon);
-            if(polygon.getDistanceToWater() == 0) polygon.moisture = Moisture.LiterallyWater;
-         //   else if(polygon.getDistanceToWater() == settings.)
+            if(polygon.water != WaterType.Land) polygon.moisture = Moisture.LiterallyWater;
+            else if(polygon.getDistanceToWater()*polygon.temperature.ordinal() < 2.0*Math.sqrt((double)diagram.polygons.size())/(double)80*(double)settings.getMoistureClimateModificator()) polygon.moisture = Moisture.SuperWet;
+            else if(polygon.getDistanceToWater()*polygon.temperature.ordinal() < 4.0*Math.sqrt((double)diagram.polygons.size())/(double)80*(double)settings.getMoistureClimateModificator()) polygon.moisture = Moisture.Wet;
+            else if(polygon.getDistanceToWater()*polygon.temperature.ordinal() < 10.0*Math.sqrt((double)diagram.polygons.size())/(double)80*(double)settings.getMoistureClimateModificator()) polygon.moisture = Moisture.Normal;
+            else if(polygon.getDistanceToWater()*polygon.temperature.ordinal() < 13.0*Math.sqrt((double)diagram.polygons.size())/(double)80*(double)settings.getMoistureClimateModificator()) polygon.moisture = Moisture.Dry;
+            else  polygon.moisture = Moisture.SuperDry;
         }
     }
 
@@ -50,13 +52,10 @@ public class Map {
         if(polygon.elevation == Elevation.MountainPeaks)  tempTemperature = 0;
         else
         {
-
              if(polygon.elevation == Elevation.Hight) tempTemperature = tempTemperature - 2;
                 else if(polygon.elevation == Elevation.Medium) tempTemperature--;
-
             if(tempTemperature <= 0) tempTemperature = 1;
         }
-     //   if(settings.getClimate() == MapPositionOnPlanet.EquatorOnMiddle)
             polygon.temperature = Temperature.values()[tempTemperature];
     }
 
@@ -91,15 +90,55 @@ public class Map {
         return null;
     }
 
-    private boolean isAWhitinBDistanceOfC(int a, int b,int c)
-    {
-        return (c - b < a || c + b >  a);
-    }
-
     private void generateRivers() {
+        Queue<Polygon> polygonQueue = new ArrayDeque<>();
+        Set<Polygon> polygonSet = new HashSet<>();
+
+
+        int landPolygonCounter = 0;
         for(Polygon polygon: diagram.polygons)
         {
-            if(polygon.water != WaterType.Ocean) polygon.setPotentialRiverDirection();
+            if(polygon.water == WaterType.Land) landPolygonCounter++;
+            polygon.setPotentialRiverDirection();
+        }
+
+        createRiverStartingPositions(polygonQueue, polygonSet, landPolygonCounter);
+        while(!polygonQueue.isEmpty())
+        {
+            Polygon tempPolygon = polygonQueue.poll();
+            tempPolygon.river = true;
+            if(tempPolygon.moisture.ordinal() < Moisture.SuperWet.ordinal()) tempPolygon.moisture = Moisture.values()[(tempPolygon.moisture.ordinal()+1)];
+            if(!polygonSet.contains(tempPolygon.riverDirection))
+            {
+                polygonSet.add(tempPolygon.riverDirection);
+                polygonQueue.add(tempPolygon.riverDirection);
+            }
+
+        }
+
+    }
+
+    private void createRiverStartingPositions(Queue<Polygon> polygonQueue, Set<Polygon> polygonSet, int landPolygonCounter) {
+        int riverLimit = landPolygonCounter/100 + settings.getRiverCountModificator();
+        Random random = new Random();
+        int riverCounter = 0;
+        ArrayList<Polygon> polygons = new ArrayList(diagram.polygons);
+        Collections.shuffle(polygons);
+        for(Polygon polygon: polygons)
+        {
+            if(polygon.water == WaterType.Land
+                    && riverCounter < riverLimit
+                    && (polygon.temperature != Temperature.Frigid
+                    || polygon.elevation == Elevation.MountainPeaks)
+                    && polygon.elevation.ordinal() >=2
+                    && polygon.moisture.ordinal() >= 2
+                    && (double)random.nextInt(polygon.elevation.ordinal() * landPolygonCounter)/(landPolygonCounter) > 0.995)
+            {
+                riverCounter++;
+                polygon.river = true;
+                polygonQueue.add(polygon);
+                polygonSet.add(polygon);
+            }
         }
     }
 
@@ -113,14 +152,8 @@ public class Map {
     private void setToLakeDistance() {
         Queue<Polygon> polygonQueue = new ArrayDeque<>();
         Set<Polygon> polygonSet = new HashSet<>();
-        for(Polygon polygon: diagram.polygons){
-            if(polygon.water == WaterType.Lake)
-            {
-                polygonQueue.add(polygon);
-                polygonSet.add(polygon);
-                polygon.distanceToLake = 0;
-            }
-        }
+
+        findLakesAndSetTheirDistance(polygonQueue, polygonSet);
         while(!polygonQueue.isEmpty())
         {
             Polygon polygon = polygonQueue.poll();
@@ -130,11 +163,22 @@ public class Map {
                 {
                     if(neigbour.water == WaterType.Land)
                     {
-                        neigbour.distanceToLake = polygon.distanceToLake;
+                        neigbour.distanceToLake = polygon.distanceToLake+1;
                         polygonSet.add(neigbour);
                         polygonQueue.add(neigbour);
                     }
                 }
+            }
+        }
+    }
+
+    private void findLakesAndSetTheirDistance(Queue<Polygon> polygonQueue, Set<Polygon> polygonSet) {
+        for(Polygon polygon: diagram.polygons){
+            if(polygon.water == WaterType.Lake)
+            {
+                polygonQueue.add(polygon);
+                polygonSet.add(polygon);
+                polygon.distanceToLake = 0;
             }
         }
     }
@@ -191,32 +235,23 @@ public class Map {
                 polygonQueue.add(polygon);
                 polygonSet.add(polygon);
             }
-
         }
     }
 
     private void createLakes() {
         Queue<Polygon> polygonQueue = new ArrayDeque<>();
         Set<Polygon> polygonSet = new HashSet<>();
-        Random random = new Random();
         ArrayList<Polygon> landPolygons = new ArrayList<>();
-        for(Polygon polygon: diagram.polygons)
-        {
-            if(polygon.water == WaterType.Land) landPolygons.add(polygon);
-        }
 
+        for(Polygon polygon: diagram.polygons)
+            if(polygon.water == WaterType.Land) landPolygons.add(polygon);
         int lakeLimit = landPolygons.size()/300 + settings.getLakeCountModificator();
+        createLakeStartingPoints(polygonQueue, polygonSet, landPolygons, lakeLimit);
+        expandLakeSizes(polygonQueue, polygonSet, lakeLimit);
+    }
+
+    private void expandLakeSizes(Queue<Polygon> polygonQueue, Set<Polygon> polygonSet, int lakeLimit) {
         int lakeCounter = 0;
-        for(Polygon polygon: landPolygons)
-        {
-            if(lakeCounter < lakeLimit && !polygon.hasOceanNeighbour() && (double)random.nextInt(landPolygons.size())/landPolygons.size() > 0.995)
-            {
-                polygon.water = WaterType.Lake;
-                polygonQueue.add(polygon);
-                polygonSet.add(polygon);
-            }
-        }
-        lakeCounter = 0;
         int lakeSizeCounter = 0;
         while(polygonQueue.size()>0)
         {
@@ -235,7 +270,21 @@ public class Map {
                     }
             }
         }
+    }
 
+    private void createLakeStartingPoints(Queue<Polygon> polygonQueue, Set<Polygon> polygonSet, ArrayList<Polygon> landPolygons, int lakeLimit) {
+        int lakeCounter = 0;
+        Random random = new Random();
+
+        for(Polygon polygon: landPolygons)
+        {
+            if(lakeCounter < lakeLimit && !polygon.hasOceanNeighbour() && (double)random.nextInt(landPolygons.size())/landPolygons.size() > 0.995)
+            {
+                polygon.water = WaterType.Lake;
+                polygonQueue.add(polygon);
+                polygonSet.add(polygon);
+            }
+        }
     }
 
     private void createOcean() {

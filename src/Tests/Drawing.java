@@ -1,6 +1,7 @@
 package Tests;
 
 import MapGeneration.*;
+import MapGeneration.GenerationSettings.Options;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +22,7 @@ public class Drawing extends JFrame {
         setLayout(new GridLayout(1,1,0,0));
         Map map = new Map();
         Screen s;
-        Options settings = new Options(600,400,12800);
+        Options settings = new Options(600,400,6400);
         s = map.getMap(settings);
         add(s);
         setVisible(true);
