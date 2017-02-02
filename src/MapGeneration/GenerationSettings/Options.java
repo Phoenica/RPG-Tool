@@ -1,4 +1,4 @@
-package MapGeneration;
+package MapGeneration.GenerationSettings;
 
 /**
  * Created by Phoenicia on 28.01.2017.
@@ -13,6 +13,9 @@ public class Options {
     private double waterLevelConstant;
     private double landmassMinPercentage;
     private boolean topWater,bottomWater,leftWater,rightWater;
+    private MapPositionOnPlanet climate;
+   // private int moistureModifier();
+
     public Options(int x, int y, int p)
     {
         xSize = x;
@@ -29,6 +32,7 @@ public class Options {
         totalLakeAreaLimitMultipler = 8;
         lakeSizeLimitModificator = 100;
         landmassMinPercentage = 0.30;
+        climate = MapPositionOnPlanet.EquatorOnMiddle;
     }
 
 
@@ -115,5 +119,13 @@ public class Options {
 
     public void setLandmassMinPercentage(double landmassMinPercentage) {
         this.landmassMinPercentage = landmassMinPercentage;
+    }
+
+    public MapPositionOnPlanet getClimate() {
+        return climate;
+    }
+
+    public void setClimate(MapPositionOnPlanet climate) {
+        this.climate = climate;
     }
 }

@@ -1,11 +1,13 @@
 package MapGeneration;
 
-
+import MapGeneration.GenerationSettings.MapPositionOnPlanet;
+import MapGeneration.GenerationSettings.Options;
 import MapGeneration.Graph.Polygon;
-import MapGeneration.Graph.WaterType;
-
+import MapGeneration.Graph.PolygonProperties.Elevation;
+import MapGeneration.Graph.PolygonProperties.Moisture;
+import MapGeneration.Graph.PolygonProperties.Temperature;
+import MapGeneration.Graph.PolygonProperties.WaterType;
 import java.util.*;
-
 
 public class Map {
     VoronoiDiagram diagram;
@@ -23,18 +25,119 @@ public class Map {
     {
         diagram = new VoronoiDiagram(settings.getXSize(),settings.getYSize());
         diagram.generate(settings.getPolygons());
-        createBodiesOfWater();
+        generateBodiesOfWater();
         generateElevations();
+        generateClimate();
+        generateRivers();
         generatedMap = new Screen(diagram);
     }
 
-    private void createBodiesOfWater() {
+    private void generateClimate() {
+
+
+        for(Polygon polygon: diagram.polygons)
+        {
+            calculateTemperature(polygon);
+            if(polygon.getDistanceToWater() == 0) polygon.moisture = Moisture.LiterallyWater;
+         //   else if(polygon.getDistanceToWater() == settings.)
+        }
+    }
+
+    private void calculateTemperature(Polygon polygon) {
+        int tempTemperature = calculateClimateTemperature(polygon).ordinal();
+        if(tempTemperature == 0);
+            else
+        if(polygon.elevation == Elevation.MountainPeaks)  tempTemperature = 0;
+        else
+        {
+
+             if(polygon.elevation == Elevation.Hight) tempTemperature = tempTemperature - 2;
+                else if(polygon.elevation == Elevation.Medium) tempTemperature--;
+
+            if(tempTemperature <= 0) tempTemperature = 1;
+        }
+     //   if(settings.getClimate() == MapPositionOnPlanet.EquatorOnMiddle)
+            polygon.temperature = Temperature.values()[tempTemperature];
+    }
+
+    private Temperature calculateClimateTemperature(Polygon polygon) {
+        int mapMiddle = settings.getYSize()/2;
+        int map1Percent = settings.getYSize()/100;
+        switch(settings.getClimate())
+        {
+            case EquatorOnMiddle:
+                if(((mapMiddle - map1Percent*5 <= polygon.centerPoint.getY() && mapMiddle >= polygon.centerPoint.getY()) || (mapMiddle + map1Percent*5 >= polygon.centerPoint.getY() && mapMiddle <= polygon.centerPoint.getY()))) return Temperature.Scorching;
+                if(((mapMiddle - map1Percent*18 < polygon.centerPoint.getY() && mapMiddle > polygon.centerPoint.getY()) || (mapMiddle + map1Percent*18 > polygon.centerPoint.getY() && mapMiddle < polygon.centerPoint.getY()))) return Temperature.Hot;
+                if(((mapMiddle - map1Percent*35 < polygon.centerPoint.getY() && mapMiddle > polygon.centerPoint.getY()) || (mapMiddle + map1Percent*35 > polygon.centerPoint.getY() && mapMiddle < polygon.centerPoint.getY()))) return Temperature.Average;
+                if(((mapMiddle - map1Percent*45 < polygon.centerPoint.getY() && mapMiddle > polygon.centerPoint.getY()) || (mapMiddle + map1Percent*45 > polygon.centerPoint.getY() && mapMiddle < polygon.centerPoint.getY()))) return Temperature.Cold;
+                return Temperature.Frigid;
+            case ColdNorth:
+                if(settings.getYSize() - map1Percent*12<= polygon.centerPoint.getY()) return Temperature.Scorching;
+                if(settings.getYSize() - map1Percent*36 <= polygon.centerPoint.getY()) return Temperature.Hot;
+                if(settings.getYSize() - map1Percent*70 <= polygon.centerPoint.getY()) return Temperature.Average;
+                if(settings.getYSize() - map1Percent*88 <= polygon.centerPoint.getY()) return Temperature.Cold;
+                return Temperature.Frigid;
+            case ColdSouth:
+                if(settings.getYSize() - map1Percent*12<= polygon.centerPoint.getY()) return Temperature.Frigid;
+                if(settings.getYSize() - map1Percent*28 <= polygon.centerPoint.getY()) return Temperature.Hot;
+                if(settings.getYSize() - map1Percent*64 <= polygon.centerPoint.getY()) return Temperature.Average;
+                if(settings.getYSize() - map1Percent*88 <= polygon.centerPoint.getY()) return Temperature.Cold;
+                return Temperature.Scorching;
+            case UniformTemperature:
+                return Temperature.Average;
+            default:
+
+        }
+        return null;
+    }
+
+    private boolean isAWhitinBDistanceOfC(int a, int b,int c)
+    {
+        return (c - b < a || c + b >  a);
+    }
+
+    private void generateRivers() {
+        for(Polygon polygon: diagram.polygons)
+        {
+            if(polygon.water != WaterType.Ocean) polygon.setPotentialRiverDirection();
+        }
+    }
+
+    private void generateBodiesOfWater() {
         setMapBordersToWater();
         createOcean();
         createLakes();
+        setToLakeDistance();
     }
 
-
+    private void setToLakeDistance() {
+        Queue<Polygon> polygonQueue = new ArrayDeque<>();
+        Set<Polygon> polygonSet = new HashSet<>();
+        for(Polygon polygon: diagram.polygons){
+            if(polygon.water == WaterType.Lake)
+            {
+                polygonQueue.add(polygon);
+                polygonSet.add(polygon);
+                polygon.distanceToLake = 0;
+            }
+        }
+        while(!polygonQueue.isEmpty())
+        {
+            Polygon polygon = polygonQueue.poll();
+            for(Polygon neigbour: polygon.neighborPolygons)
+            {
+                if(!polygonSet.contains(neigbour))
+                {
+                    if(neigbour.water == WaterType.Land)
+                    {
+                        neigbour.distanceToLake = polygon.distanceToLake;
+                        polygonSet.add(neigbour);
+                        polygonQueue.add(neigbour);
+                    }
+                }
+            }
+        }
+    }
 
     private void generateElevations() {
         Queue<Polygon> polygonQueue = new ArrayDeque<>();
@@ -55,10 +158,10 @@ public class Map {
         avargeDistanceToOcean = avargeDistanceToOcean / polygonSet.size();
         for(Polygon polygon: polygonSet)
         {
-            if(polygon.distanceToOcean <= 2) polygon.elevation = 1;
-            else if(polygon.distanceToOcean < avargeDistanceToOcean+4) polygon.elevation = 2;
-            else if(polygon.distanceToOcean < (maxDistance+5 + avargeDistanceToOcean)/2) polygon.elevation = 3;
-            else polygon.elevation = 4;
+            if(polygon.distanceToOcean <= 2) polygon.elevation = Elevation.Low;
+            else if(polygon.distanceToOcean < avargeDistanceToOcean+5) polygon.elevation = Elevation.Medium;
+            else if(polygon.elevation!=Elevation.MountainPeaks && polygon.distanceToOcean < (maxDistance+6 + avargeDistanceToOcean)/2) polygon.elevation = Elevation.Hight;
+            else polygon.elevation = Elevation.MountainPeaks;
 
         }
     }
@@ -88,6 +191,7 @@ public class Map {
                 polygonQueue.add(polygon);
                 polygonSet.add(polygon);
             }
+
         }
     }
 
@@ -131,7 +235,6 @@ public class Map {
                     }
             }
         }
-        System.out.print("");
 
     }
 

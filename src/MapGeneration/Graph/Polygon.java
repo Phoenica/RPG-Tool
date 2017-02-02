@@ -1,13 +1,21 @@
 package MapGeneration.Graph;
 
+import MapGeneration.Graph.PolygonProperties.Elevation;
+import MapGeneration.Graph.PolygonProperties.Moisture;
+import MapGeneration.Graph.PolygonProperties.Temperature;
+import MapGeneration.Graph.PolygonProperties.WaterType;
+
 import java.util.ArrayList;
 
 public class Polygon implements Comparable<Polygon>,GraphElement {
     public final Point centerPoint;
     public WaterType water;
     public Polygon riverDirection;
-    public int elevation;
+    public Elevation elevation;
     public int distanceToOcean;
+    public int distanceToLake;
+    public Moisture moisture;
+    public Temperature temperature;// 0-100
 
     public Polygon(int x, int y)
     {
@@ -15,7 +23,7 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
         neighborPolygons = new ArrayList<>();
         polygonPixels = new ArrayList<>();
         distanceToOcean = -1;
-        elevation = -1;
+        elevation = Elevation.Water;
     }
     public ArrayList<Point> polygonPixels;
     public ArrayList<Polygon> neighborPolygons;
@@ -35,11 +43,35 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
         riverDirection = this;
         for(Polygon polygon: neighborPolygons)
         {
-            if(polygon.elevation < riverDirection.elevation) {
+            if(polygon.elevation.ordinal() < riverDirection.elevation.ordinal()) {
                 riverDirection = polygon;
             }
-            if(riverDirection.elevation == 0) break;
+            if(riverDirection.elevation.ordinal() == 0) break;
         }
+        if(riverDirection == this)
+        {
+            for(Polygon polygon: neighborPolygons)
+            {
+                if(polygon.distanceToOcean < riverDirection.distanceToOcean) {
+                    riverDirection = polygon;
+                }
+                if(riverDirection.elevation.ordinal() == 0) break;
+            }
+        }
+
+    }
+    public int getDistanceToWater()
+    {
+        if(distanceToOcean > distanceToLake) return distanceToLake;
+        else return distanceToOcean;
+    }
+    public boolean hasLakeNeighbour()
+    {
+        for(Polygon neighbour: neighborPolygons)
+        {
+            if(neighbour.water == WaterType.Lake) return true;
+        }
+        return false;
     }
 
     public boolean hasOceanNeighbour()
