@@ -5,26 +5,25 @@ import java.awt.*;
 /**
  * Created by Phoenicia on 02.02.2017.
  */
-public class Grassland implements Biome {
-    private static Grassland instance;
-    private Grassland()
+public class WasteLandDesert implements Biome {
+    private static WasteLandDesert instance;
+    private WasteLandDesert()
     {
 
     }
-    public static Grassland getInstance()
+    public static WasteLandDesert getInstance()
     {
-        if(instance == null) instance = new Grassland();
+        if(instance == null) instance = new WasteLandDesert();
         return instance;
     }
 
     @Override
     public Color getBiomeColor() {
-        return new Color(212,255,153);
+        return new Color(209,205,151);
     }
 
     @Override
     public TexturePaint getBiomeTexture() {
         return null;
     }
-
 }

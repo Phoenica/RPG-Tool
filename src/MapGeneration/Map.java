@@ -29,7 +29,12 @@ public class Map {
         generateElevations();
         generateClimate();
         generateRivers();
+        generateBiomes();
         generatedMap = new Screen(diagram);
+    }
+
+    private void generateBiomes() {
+        diagram.polygons.forEach(Polygon::setBiome);
     }
 
     private void generateClimate() {

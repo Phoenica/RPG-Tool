@@ -22,7 +22,7 @@ public class Drawing extends JFrame {
         setLayout(new GridLayout(1,1,0,0));
         Map map = new Map();
         Screen s;
-        Options settings = new Options(600,400,6400);
+        Options settings = new Options(1200,800,20400);
         s = map.getMap(settings);
         add(s);
         setVisible(true);

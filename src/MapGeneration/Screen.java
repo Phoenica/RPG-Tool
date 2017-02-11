@@ -22,12 +22,7 @@ public class Screen extends JPanel {
         {
             for(MapGeneration.Graph.Polygon polygon: diagram.polygons)
             {
-                if(polygon.moisture == Moisture.LiterallyWater) g.setColor(Color.BLUE);
-                if(polygon.moisture == Moisture.SuperWet) g.setColor(Color.GREEN);
-                if(polygon.moisture == Moisture.Wet) g.setColor(Color.CYAN);
-                if(polygon.moisture == Moisture.Normal) g.setColor(Color.YELLOW);
-                if(polygon.moisture == Moisture.Dry) g.setColor(Color.ORANGE);
-                if(polygon.moisture == Moisture.SuperDry) g.setColor(Color.RED);
+                g.setColor(polygon.biome.getBiomeColor());
 
                 /*if(polygon.temperature == Temperature.Frigid) g.setColor(Color.WHITE);
                 else
@@ -70,7 +65,6 @@ public class Screen extends JPanel {
                 {
                     g.drawRect(pixel.getX(),pixel.getY(),1,1);
                 }
-                g.setColor(Color.red);
             }
             for(MapGeneration.Graph.Polygon polygon: diagram.polygons)
             {

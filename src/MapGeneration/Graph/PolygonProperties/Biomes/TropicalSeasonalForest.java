@@ -1,7 +1,28 @@
 package MapGeneration.Graph.PolygonProperties.Biomes;
 
-/**
- * Created by Phoenicia on 02.02.2017.
- */
-public class TropicalSeasonalForest {
+import java.awt.*;
+
+
+public class TropicalSeasonalForest implements Biome {
+    private static TropicalSeasonalForest instance;
+    private TropicalSeasonalForest()
+    {
+
+    }
+    public static TropicalSeasonalForest getInstance()
+    {
+        if(instance == null) instance = new TropicalSeasonalForest();
+        return instance;
+    }
+
+    @Override
+    public Color getBiomeColor() {
+        return new Color(169,204,164);
+    }
+
+    @Override
+    public TexturePaint getBiomeTexture() {
+        return null;
+    }
+
 }

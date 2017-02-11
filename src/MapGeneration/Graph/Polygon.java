@@ -1,10 +1,7 @@
 package MapGeneration.Graph;
 
+import MapGeneration.Graph.PolygonProperties.*;
 import MapGeneration.Graph.PolygonProperties.Biomes.Biome;
-import MapGeneration.Graph.PolygonProperties.Elevation;
-import MapGeneration.Graph.PolygonProperties.Moisture;
-import MapGeneration.Graph.PolygonProperties.Temperature;
-import MapGeneration.Graph.PolygonProperties.WaterType;
 
 import java.util.ArrayList;
 
@@ -106,6 +103,11 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
             if(neighbour.water == WaterType.Ocean) return true;
         }
         return false;
+    }
+    
+    public void setBiome()
+    {
+        biome = BiomeChoser.getBiome(this);
     }
     @Override
     public int compareTo(Polygon o) {

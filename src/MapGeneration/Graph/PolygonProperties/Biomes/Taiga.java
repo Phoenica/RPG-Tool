@@ -1,7 +1,30 @@
 package MapGeneration.Graph.PolygonProperties.Biomes;
 
+import java.awt.*;
+
 /**
  * Created by Phoenicia on 02.02.2017.
  */
-public class Taiga {
+public class Taiga implements Biome {
+    private static Taiga instance;
+    private Taiga()
+    {
+
+    }
+    public static Taiga getInstance()
+    {
+        if(instance == null) instance = new Taiga();
+        return instance;
+    }
+
+    @Override
+    public Color getBiomeColor() {
+        return new Color(204,212,187);
+    }
+
+    @Override
+    public TexturePaint getBiomeTexture() {
+        return null;
+    }
+
 }
