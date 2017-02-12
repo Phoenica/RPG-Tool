@@ -34,7 +34,7 @@ public class CityToJsonConverter {
     {
         String name;
         //String biome;
-        boolean isThereRiver;
+        boolean isThereRiver = false;
         boolean waterOnLeft = false;
         boolean waterOnRight = false;
         boolean waterOnTop = false;
@@ -43,11 +43,10 @@ public class CityToJsonConverter {
         {
             this.name = polygon.city.toString();
         //    this.biome = getLast(polygon.biome.getClass().toString().split("\\."));
-            if(polygon.river == true)
+            if(polygon.river || polygon.hasRiverNeighbour())
             {
                 isThereRiver = true;
             }
-            isThereRiver = false;
             for(Polygon neighbour: polygon.neighborPolygons)
             {
                 if(neighbour.water != WaterType.Land)

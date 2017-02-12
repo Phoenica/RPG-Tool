@@ -24,7 +24,7 @@ public class Drawing extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new GridLayout(1,1,0,0));
         MapPrinter s;
-        Options settings = new Options(800,400,4000);
+        Options settings = new Options(600,300,8000);
         Map map = new Map(settings);
         s = map.getMap();
         try {
