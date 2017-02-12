@@ -15,6 +15,7 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
     public Moisture moisture;
     public Temperature temperature;
     public Biome biome;
+    public City city;
     public boolean river;
 
     public Polygon(int x, int y)
@@ -95,7 +96,22 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
         }
         return false;
     }
-
+    public boolean hasRiverNeighbour()
+    {
+        for(Polygon neighbour: neighborPolygons)
+        {
+            if(neighbour.river == true) return true;
+        }
+        return false;
+    }
+    public boolean hasCityNeighbour()
+    {
+        for(Polygon neighbour: neighborPolygons)
+        {
+            if(neighbour.city != null) return true;
+        }
+        return false;
+    }
     public boolean hasOceanNeighbour()
     {
         for(Polygon neighbour: neighborPolygons)
@@ -120,4 +136,5 @@ public class Polygon implements Comparable<Polygon>,GraphElement {
         }
         else return -1;
     }
+
 }

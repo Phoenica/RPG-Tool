@@ -1,10 +1,13 @@
 package Tests;
 
 import MapGeneration.*;
+import MapGeneration.DataExport.CityToJsonConverter;
+import MapGeneration.DataExport.MapPrinter;
 import MapGeneration.GenerationSettings.Options;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class Drawing extends JFrame {
     public Drawing()
@@ -20,10 +23,15 @@ public class Drawing extends JFrame {
     {
         setLocationRelativeTo(null);
         setLayout(new GridLayout(1,1,0,0));
-        Map map = new Map();
-        Screen s;
-        Options settings = new Options(1200,800,20400);
-        s = map.getMap(settings);
+        MapPrinter s;
+        Options settings = new Options(800,400,4000);
+        Map map = new Map(settings);
+        s = map.getMap();
+        try {
+            (new CityToJsonConverter()).convertAndSave(map);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         add(s);
         setVisible(true);
     }

@@ -17,7 +17,7 @@ public class TropicalSeasonalForest implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(169,204,164);
+        return new Color(162, 231, 190);
     }
 
     @Override

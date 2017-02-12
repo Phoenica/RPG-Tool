@@ -19,7 +19,7 @@ public class TemperateDeciduousForest implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(180,201,169);
+        return new Color(48,201, 62);
     }
 
     @Override

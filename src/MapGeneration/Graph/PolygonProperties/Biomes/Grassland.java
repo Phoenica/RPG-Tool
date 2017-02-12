@@ -19,7 +19,7 @@ public class Grassland implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(212,255,153);
+        return new Color(175,255, 0);
     }
 
     @Override

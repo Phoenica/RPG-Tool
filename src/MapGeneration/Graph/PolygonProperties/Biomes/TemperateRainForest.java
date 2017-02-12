@@ -19,7 +19,7 @@ public class TemperateRainForest implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(164,196,168);
+        return new Color(124,196, 0);
     }
 
     @Override

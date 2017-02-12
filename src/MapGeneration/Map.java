@@ -1,36 +1,119 @@
 package MapGeneration;
 
-import MapGeneration.GenerationSettings.MapPositionOnPlanet;
+
+import MapGeneration.DataExport.MapPrinter;
 import MapGeneration.GenerationSettings.Options;
 import MapGeneration.Graph.Polygon;
-import MapGeneration.Graph.PolygonProperties.Elevation;
-import MapGeneration.Graph.PolygonProperties.Moisture;
-import MapGeneration.Graph.PolygonProperties.Temperature;
-import MapGeneration.Graph.PolygonProperties.WaterType;
+import MapGeneration.Graph.PolygonProperties.*;
+
+
 import java.util.*;
 
 public class Map {
-    VoronoiDiagram diagram;
-    Screen generatedMap;
+    public VoronoiDiagram diagram;
+    MapPrinter generatedMap;
     Options settings;
-
-    public Screen getMap(Options settings)
+    public MapPrinter getMap(VoronoiDiagram diagram)
     {
-        this.settings = settings;
+        this.diagram = diagram;
         generateMap();
         return generatedMap;
     }
+    public MapPrinter getMap()
+    {
+        generateMap();
+        return generatedMap;
+    }
+    public Map(Options settings)
+    {
+        this.settings = settings;
+    }
 
-    private void generateMap()
+    public void generateDiagram()
     {
         diagram = new VoronoiDiagram(settings.getXSize(),settings.getYSize());
         diagram.generate(settings.getPolygons());
+    }
+    private void generateMap()
+    {
+        if(diagram == null)
+        {
+            generateDiagram();
+        }
         generateBodiesOfWater();
         generateElevations();
         generateClimate();
         generateRivers();
         generateBiomes();
-        generatedMap = new Screen(diagram);
+        generateCities();
+        generatedMap = new MapPrinter(diagram);
+    }
+
+    private void generateCities() {
+        int cityCounter = 0;
+        int maxCityNumber;
+        List<Polygon> polygonList = new ArrayList<>();
+        for(Polygon polygon: diagram.polygons)
+        {
+            if(polygon.water == WaterType.Land)
+                polygonList.add(polygon);
+        }
+        maxCityNumber = (int)(settings.getCityModifier()*(polygonList.size()/100));
+        Collections.shuffle(polygonList);
+        Random random = new Random();
+        for(Polygon polygon: polygonList)
+        {
+            if(polygon.hasCityNeighbour()) continue;
+            int chanceEstimation = estimateCityChance(polygon);
+            if(chanceEstimation > random.nextInt(100))
+            {
+                polygon.city = new City(settings.getCityNames().get(cityCounter));
+                cityCounter++;
+            }
+            if(cityCounter >= maxCityNumber || cityCounter >= settings.getCityNames().size()) break;
+        }
+    }
+    private int estimateCityChance(Polygon polygon)
+    {
+        int chanceEstimation = 0;
+        switch(polygon.temperature)
+        {
+            case Frigid:
+                chanceEstimation -=30;
+                break;
+            case Cold:
+                break;
+            case Average:
+                chanceEstimation +=10;
+                break;
+            case Hot:
+                chanceEstimation +=15;
+            case Scorching:
+                break;
+        }
+        switch(polygon.moisture)
+        {
+            case SuperWet:
+                chanceEstimation +=10;
+                break;
+            case Wet:
+                chanceEstimation +=10;
+                break;
+            case Normal:
+                chanceEstimation +=5;
+                break;
+            case Dry:
+                chanceEstimation -=5;
+            case SuperDry:
+                chanceEstimation -=20;
+                break;
+        }
+        if(polygon.elevation == Elevation.MountainPeaks) chanceEstimation -= 30;
+        if(polygon.hasOceanNeighbour()) chanceEstimation += 40;
+        else if(polygon.hasLakeNeighbour()) chanceEstimation += 20;
+        if(polygon.river == true) chanceEstimation += 30;
+            else if(polygon.hasRiverNeighbour()) chanceEstimation +=10;
+        return chanceEstimation;
     }
 
     private void generateBiomes() {
@@ -67,25 +150,27 @@ public class Map {
     private Temperature calculateClimateTemperature(Polygon polygon) {
         int mapMiddle = settings.getYSize()/2;
         int map1Percent = settings.getYSize()/100;
+        Random random = new Random();
+        double mod = 1.0-0.1*((double)(random.nextInt(10)-5));
         switch(settings.getClimate())
         {
             case EquatorOnMiddle:
-                if(((mapMiddle - map1Percent*5 <= polygon.centerPoint.getY() && mapMiddle >= polygon.centerPoint.getY()) || (mapMiddle + map1Percent*5 >= polygon.centerPoint.getY() && mapMiddle <= polygon.centerPoint.getY()))) return Temperature.Scorching;
-                if(((mapMiddle - map1Percent*18 < polygon.centerPoint.getY() && mapMiddle > polygon.centerPoint.getY()) || (mapMiddle + map1Percent*18 > polygon.centerPoint.getY() && mapMiddle < polygon.centerPoint.getY()))) return Temperature.Hot;
+                if(((mapMiddle - map1Percent*5*mod <= polygon.centerPoint.getY() && mapMiddle >= polygon.centerPoint.getY()) || (mapMiddle + map1Percent*5*mod >= polygon.centerPoint.getY() && mapMiddle <= polygon.centerPoint.getY()))) return Temperature.Scorching;
+                if(((mapMiddle - map1Percent*18*mod < polygon.centerPoint.getY() && mapMiddle > polygon.centerPoint.getY()) || (mapMiddle + map1Percent*18*mod > polygon.centerPoint.getY() && mapMiddle < polygon.centerPoint.getY()))) return Temperature.Hot;
                 if(((mapMiddle - map1Percent*35 < polygon.centerPoint.getY() && mapMiddle > polygon.centerPoint.getY()) || (mapMiddle + map1Percent*35 > polygon.centerPoint.getY() && mapMiddle < polygon.centerPoint.getY()))) return Temperature.Average;
                 if(((mapMiddle - map1Percent*45 < polygon.centerPoint.getY() && mapMiddle > polygon.centerPoint.getY()) || (mapMiddle + map1Percent*45 > polygon.centerPoint.getY() && mapMiddle < polygon.centerPoint.getY()))) return Temperature.Cold;
                 return Temperature.Frigid;
             case ColdNorth:
-                if(settings.getYSize() - map1Percent*12<= polygon.centerPoint.getY()) return Temperature.Scorching;
-                if(settings.getYSize() - map1Percent*36 <= polygon.centerPoint.getY()) return Temperature.Hot;
+                if(settings.getYSize() - map1Percent*12*mod<= polygon.centerPoint.getY()) return Temperature.Scorching;
+                if(settings.getYSize() - map1Percent*36*mod <= polygon.centerPoint.getY()) return Temperature.Hot;
                 if(settings.getYSize() - map1Percent*70 <= polygon.centerPoint.getY()) return Temperature.Average;
                 if(settings.getYSize() - map1Percent*88 <= polygon.centerPoint.getY()) return Temperature.Cold;
                 return Temperature.Frigid;
             case ColdSouth:
                 if(settings.getYSize() - map1Percent*12<= polygon.centerPoint.getY()) return Temperature.Frigid;
-                if(settings.getYSize() - map1Percent*28 <= polygon.centerPoint.getY()) return Temperature.Hot;
-                if(settings.getYSize() - map1Percent*64 <= polygon.centerPoint.getY()) return Temperature.Average;
-                if(settings.getYSize() - map1Percent*88 <= polygon.centerPoint.getY()) return Temperature.Cold;
+                if(settings.getYSize() - map1Percent*28*mod <= polygon.centerPoint.getY()) return Temperature.Cold;
+                if(settings.getYSize() - map1Percent*64*mod <= polygon.centerPoint.getY()) return Temperature.Average;
+                if(settings.getYSize() - map1Percent*88*mod <= polygon.centerPoint.getY()) return Temperature.Hot;
                 return Temperature.Scorching;
             case UniformTemperature:
                 return Temperature.Average;
@@ -209,7 +294,7 @@ public class Map {
         {
             if(polygon.distanceToOcean <= 2) polygon.elevation = Elevation.Low;
             else if(polygon.distanceToOcean < avargeDistanceToOcean+5) polygon.elevation = Elevation.Medium;
-            else if(polygon.elevation!=Elevation.MountainPeaks && polygon.distanceToOcean < (maxDistance+6 + avargeDistanceToOcean)/2) polygon.elevation = Elevation.Hight;
+            else if(polygon.elevation!=Elevation.MountainPeaks && polygon.distanceToOcean < (maxDistance+8 + avargeDistanceToOcean)/2) polygon.elevation = Elevation.Hight;
             else polygon.elevation = Elevation.MountainPeaks;
 
         }

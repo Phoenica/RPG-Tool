@@ -19,7 +19,7 @@ public class Taiga implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(204,212,187);
+        return new Color(155,212, 157);
     }
 
     @Override

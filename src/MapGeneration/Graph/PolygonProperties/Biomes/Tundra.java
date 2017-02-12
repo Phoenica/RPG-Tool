@@ -17,7 +17,7 @@ public class Tundra implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(221,221,221);
+        return new Color(189,221, 190);
     }
 
     @Override

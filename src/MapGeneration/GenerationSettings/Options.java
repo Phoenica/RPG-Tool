@@ -1,5 +1,9 @@
 package MapGeneration.GenerationSettings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 /**
  * Created by Phoenicia on 28.01.2017.
  */
@@ -14,8 +18,10 @@ public class Options {
     private double landmassMinPercentage;
     private boolean topWater,bottomWater,leftWater,rightWater;
     private MapPositionOnPlanet climate;
-    private int moistureClimateModificator;
+    private double moistureClimateModificator;
     private int riverCountModificator;
+    private double cityModifier;
+    private ArrayList cityNames;
    // private int moistureModifier();
 
     public Options(int x, int y, int p)
@@ -36,7 +42,20 @@ public class Options {
         lakeSizeLimitModificator = 100;
         landmassMinPercentage = 0.30;
         climate = MapPositionOnPlanet.EquatorOnMiddle;
-        moistureClimateModificator = 1;
+        moistureClimateModificator = 0.8;
+        cityModifier = 0.4;
+        setDefaultCityNames();
+    }
+
+    private void setDefaultCityNames() {
+        cityNames =new ArrayList( Arrays.asList(new String[]{"Aerilon", "Albion","Aquarin", "Avalon","Aramoor","Azmar","Begger’s Hole","Black Hollow","Blue Field","Briar Glen","Brickelwhyte",
+        "Broken Shield","Boatwright","Bullmar","Carran","City of Fire","Coalfell","Cullfield","Darkwell","Deathfall","Doonatel","Dry Gulch","Easthaven","Ecrin",
+        "Erast", "Far Water", "Firebend", "Fool’s March", "Frostford", "Goldcrest","Goldenleaf","Greenflower","Garen’s Well","Haran","Hillfar","Hogsfeet",
+                "Hollyhead","Hull","Hwen","Icemeet","Irragin","Jongvale","Leeside","Lullin","Millstone","Moonbright","Mountmend","Nearon","New Cresthill",
+         "Northpass", "Nuxvar", "Oakheart", "Old Ashton", "Orrinshire", "Ozryn", "Pavv", "Pran", "Quan Ma", "Queenstown", "Ramshorn", "Rivermouth", "Seameet",
+                "Silverkeep", "South Warren", "Snowmelt", "Swordbreak", "Tarrin", "Trudid", "Ula’ree", "Veritas", "Wavemeet", "Whiteridge", "Willowdale",
+                "Windrip", "Wellspring", "Westwend", "Wolfden", "Yellowseed","Zumka"}));
+        Collections.shuffle(cityNames);
     }
 
 
@@ -133,11 +152,11 @@ public class Options {
         this.climate = climate;
     }
 
-    public int getMoistureClimateModificator() {
+    public double getMoistureClimateModificator() {
         return moistureClimateModificator;
     }
 
-    public void setMoistureClimateModificator(int moistureClimateModificator) {
+    public void setMoistureClimateModificator(double moistureClimateModificator) {
         this.moistureClimateModificator = moistureClimateModificator;
     }
 
@@ -147,5 +166,21 @@ public class Options {
 
     public void setRiverCountModificator(int riverCountModificator) {
         this.riverCountModificator = riverCountModificator;
+    }
+
+    public double getCityModifier() {
+        return cityModifier;
+    }
+
+    public void setCityModifier(double cityModifier) {
+        this.cityModifier = cityModifier;
+    }
+
+    public ArrayList<String> getCityNames() {
+        return cityNames;
+    }
+
+    public void setCityNames(ArrayList<String> cityNames) {
+        this.cityNames = cityNames;
     }
 }

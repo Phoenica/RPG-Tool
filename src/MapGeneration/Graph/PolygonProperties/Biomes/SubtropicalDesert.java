@@ -19,7 +19,7 @@ public class SubtropicalDesert implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(233,221,199);
+        return new Color(229, 233, 146);
     }
 
     @Override

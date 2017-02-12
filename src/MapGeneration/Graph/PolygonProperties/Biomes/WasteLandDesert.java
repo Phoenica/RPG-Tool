@@ -19,7 +19,7 @@ public class WasteLandDesert implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(209,205,151);
+        return new Color(229, 216, 104);
     }
 
     @Override

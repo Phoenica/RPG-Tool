@@ -19,7 +19,7 @@ public class Shrubland implements Biome {
 
     @Override
     public Color getBiomeColor() {
-        return new Color(196,204,187);
+        return new Color(140, 205, 97);
     }
 
     @Override
