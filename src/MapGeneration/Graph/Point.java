@@ -1,14 +1,14 @@
 package MapGeneration.Graph;
 
-public class Point implements Comparable<Point>{
+public class Point<T extends Polygon> implements Comparable<Point>{
     int x, y;
-    public Polygon parentPolygon;
+    public T parentPolygon;
     public Point(int x, int y)
     {
         this.x = x;
         this.y = y;
     }
-    public Point(int x, int y, Polygon polygon)
+    public Point(int x, int y, T polygon)
     {
         this.x = x;
         this.y = y;

@@ -1,7 +1,6 @@
 package Tests;
 
 import MapGeneration.*;
-import MapGeneration.DataExport.CityToJsonConverter;
 import MapGeneration.DataExport.MapPrinter;
 import MapGeneration.GenerationSettings.Options;
 
@@ -24,14 +23,10 @@ public class Drawing extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new GridLayout(1,1,0,0));
         MapPrinter s;
-        Options settings = new Options(600,300,8000);
+        Options settings = new Options(600,300,4000);
         Map map = new Map(settings);
         s = map.getMap();
-        try {
-            (new CityToJsonConverter()).convertAndSave(map);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         add(s);
         setVisible(true);
     }

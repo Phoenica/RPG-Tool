@@ -1,4 +1,4 @@
-package MapGeneration.Graph.PolygonProperties;
+package MapGeneration.MapTileProperties;
 
 
 public enum WaterType {

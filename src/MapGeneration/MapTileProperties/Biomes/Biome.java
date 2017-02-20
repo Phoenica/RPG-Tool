@@ -1,4 +1,4 @@
-package MapGeneration.Graph.PolygonProperties.Biomes;
+package MapGeneration.MapTileProperties.Biomes;
 
 import java.awt.*;
 /**

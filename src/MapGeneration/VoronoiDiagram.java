@@ -4,14 +4,16 @@ import MapGeneration.Graph.*;
 
 import java.util.*;
 
-public class VoronoiDiagram {
+public class VoronoiDiagram<T extends Polygon> {
     public final int xSize;
     public final int ySize;
-    public Point[][] pixelPoints;
-    public ArrayList<Polygon> polygons;
+    public final Class<T> diagramClassType;
+    public Point<T>[][] pixelPoints;
+    public ArrayList<T> polygons;
     private Point [] directions = {new Point(-1,0), new Point(0,-1)};
-    public VoronoiDiagram(int x, int y)
+    public VoronoiDiagram(int x, int y,Class<T> diagramClassType)
     {
+        this.diagramClassType = diagramClassType;
         xSize = x;
         ySize = y;
     }
@@ -30,12 +32,12 @@ public class VoronoiDiagram {
             {
                 Polygon ownerPolygon = polygons.get(0);
                 Point currentPixel = new Point(x,y);
-                for(Polygon polygon: polygons)
+                for(Polygon polygon : polygons)
                 {
                     if(ownerPolygon.centerPoint.distanceTo(currentPixel) > polygon.centerPoint.distanceTo(currentPixel))
                         ownerPolygon = polygon;
                 }
-                pixelPoints[x][y] = new Point(x,y,ownerPolygon);
+                pixelPoints[x][y] = new Point(x,y, ownerPolygon);
                 ownerPolygon.polygonPixels.add(pixelPoints[x][y]);
                 setNeighbourPolygons(pixelPoints[x][y]);
             }
@@ -58,7 +60,7 @@ public class VoronoiDiagram {
        }
     }
 
-    private ArrayList<Polygon> generateCentralPoints(int polyCount) {
+    private ArrayList<T> generateCentralPoints(int polyCount) {
         ArrayList newPolygons = new ArrayList();
         Random random = new Random();
         SortedSet<Point> polygonCenters = new TreeSet();
@@ -68,7 +70,7 @@ public class VoronoiDiagram {
         }
         for(Point point: polygonCenters)
         {
-            newPolygons.add(new Polygon(point.getX(),point.getY()));
+            newPolygons.add(Polygon.getGenericInstance(diagramClassType,point));
         }
         return newPolygons;
     }

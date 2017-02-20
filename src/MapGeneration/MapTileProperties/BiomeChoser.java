@@ -1,7 +1,7 @@
-package MapGeneration.Graph.PolygonProperties;
+package MapGeneration.MapTileProperties;
 
-import MapGeneration.Graph.Polygon;
-import MapGeneration.Graph.PolygonProperties.Biomes.*;
+import MapGeneration.MapTile;
+import MapGeneration.MapTileProperties.Biomes.*;
 
 
 public class BiomeChoser {
@@ -16,8 +16,8 @@ public class BiomeChoser {
                 {WasteLandDesert.getInstance(),SubtropicalDesert.getInstance(),Grassland.getInstance(),TropicalSeasonalForest.getInstance(),TropicalSeasonalForest.getInstance(),Water.getInstance()}
         };
     }
-    public static Biome getBiome(Polygon polygon)
+    public static Biome getBiome(MapTile mapTile)
     {
-        return biomes[polygon.temperature.ordinal()][polygon.moisture.ordinal()];
+        return biomes[mapTile.temperature.ordinal()][mapTile.moisture.ordinal()];
     }
 }

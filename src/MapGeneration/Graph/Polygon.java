@@ -1,140 +1,30 @@
 package MapGeneration.Graph;
 
-import MapGeneration.Graph.PolygonProperties.*;
-import MapGeneration.Graph.PolygonProperties.Biomes.Biome;
-
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-public class Polygon implements Comparable<Polygon>,GraphElement {
-    public final Point centerPoint;
-    public WaterType water;
-    public Polygon riverDirection;
-    public Elevation elevation;
-    public int distanceToOcean;
-    public int distanceToLake;
-    public Moisture moisture;
-    public Temperature temperature;
-    public Biome biome;
-    public City city;
-    public boolean river;
-
-    public Polygon(int x, int y)
-    {
-        centerPoint = new Point(x,y);
-        neighborPolygons = new ArrayList<>();
-        polygonPixels = new ArrayList<>();
-        distanceToOcean = -1;
-        elevation = Elevation.Water;
-        distanceToLake = 999;
-        river = false;
-    }
+public class Polygon<T extends Polygon> {
+    public final Point<T> centerPoint;
     public ArrayList<Point> polygonPixels;
-    public ArrayList<Polygon> neighborPolygons;
+    public ArrayList<T> neighborPolygons;
 
-    public double getWaterToLandNeighbourRatio()
+    public Polygon(Integer x, Integer y)
     {
-        double counter =  0;
-        for(Polygon neighbour: neighborPolygons)
-        {
-            if(neighbour.water != null && neighbour.water != WaterType.Land) counter++;
-        }
-        return counter / neighborPolygons.size();
+        centerPoint = new Point<>(x,y);
+        this.neighborPolygons = new ArrayList<>();
+        polygonPixels = new ArrayList<>();
     }
 
-    public void setPotentialRiverDirection()
-    {
-        riverDirection = this;
-        if(hasOceanNeighbour())
-        {
-            for(Polygon polygon: neighborPolygons)
-            {
-                if(polygon.water == WaterType.Ocean){
-                    riverDirection = polygon;
-                break;}
-            }
-
+    public static <E extends Polygon>E getGenericInstance(Class<E> diagramClassType, Point centerPoint){
+        E polygon = null;
+        try {
+            Class[] cArg = new Class[2];
+            cArg[0] = Integer.class;
+            cArg[1] = Integer.class;
+             polygon = diagramClassType.getDeclaredConstructor(cArg).newInstance(centerPoint.getX(),centerPoint.getY());
+        } catch (InstantiationException | IllegalAccessException |InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
         }
-        for(Polygon polygon: neighborPolygons)
-        {
-            if(polygon.elevation.ordinal() < riverDirection.elevation.ordinal() && polygon.riverDirection != this) {
-                riverDirection = polygon;
-            }
-            if(riverDirection.elevation.ordinal() == 0) break;
-        }
-        if(riverDirection == this)
-        {
-            for(Polygon polygon: neighborPolygons)
-            {
-                if(polygon.distanceToOcean < riverDirection.distanceToOcean && polygon.riverDirection != this) {
-                    riverDirection = polygon;
-                }
-                if(riverDirection.elevation.ordinal() == 0) break;
-            }
-        }
-        if(riverDirection == this)
-        {
-            for(Polygon polygon: neighborPolygons)
-            {
-                if(polygon.river == true && polygon.riverDirection != this)
-                {
-                    riverDirection = polygon;
-                }
-            }
-        }
-
+        return polygon;
     }
-    public int getDistanceToWater()
-    {
-        if(distanceToOcean > distanceToLake) return distanceToLake;
-        else return distanceToOcean;
-    }
-    public boolean hasLakeNeighbour()
-    {
-        for(Polygon neighbour: neighborPolygons)
-        {
-            if(neighbour.water == WaterType.Lake) return true;
-        }
-        return false;
-    }
-    public boolean hasRiverNeighbour()
-    {
-        for(Polygon neighbour: neighborPolygons)
-        {
-            if(neighbour.river == true) return true;
-        }
-        return false;
-    }
-    public boolean hasCityNeighbour()
-    {
-        for(Polygon neighbour: neighborPolygons)
-        {
-            if(neighbour.city != null) return true;
-        }
-        return false;
-    }
-    public boolean hasOceanNeighbour()
-    {
-        for(Polygon neighbour: neighborPolygons)
-        {
-            if(neighbour.water == WaterType.Ocean) return true;
-        }
-        return false;
-    }
-    
-    public void setBiome()
-    {
-        biome = BiomeChoser.getBiome(this);
-    }
-    @Override
-    public int compareTo(Polygon o) {
-        if(this.centerPoint.getX() > o.centerPoint.getX()) return 1;
-        else if(this.centerPoint.getX() == o.centerPoint.getX())
-        {
-            if(this.centerPoint.getY() > o.centerPoint.getY()) return 1;
-            else if(this.centerPoint.getY() == o.centerPoint.getY()) return 0;
-            else return -1;
-        }
-        else return -1;
-    }
-
 }

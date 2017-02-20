@@ -1,11 +1,8 @@
 package MapGeneration.DataExport;
 
 import MapGeneration.Graph.Point;
-import MapGeneration.Graph.PolygonProperties.Biomes.Biome;
-import MapGeneration.Graph.PolygonProperties.Biomes.Glacier;
-import MapGeneration.Graph.PolygonProperties.Moisture;
-import MapGeneration.Graph.PolygonProperties.Temperature;
-import MapGeneration.Graph.PolygonProperties.WaterType;
+import MapGeneration.MapTileProperties.Biomes.Glacier;
+import MapGeneration.MapTile;
 import MapGeneration.VoronoiDiagram;
 
 import javax.swing.*;
@@ -14,7 +11,7 @@ import java.awt.geom.Ellipse2D;
 
 
 public class MapPrinter extends JPanel {
-    private VoronoiDiagram diagram;
+    private VoronoiDiagram<MapTile> diagram;
     public MapPrinter(VoronoiDiagram diagram)
     {
         this.diagram = diagram;
@@ -24,29 +21,29 @@ public class MapPrinter extends JPanel {
     {
         if(diagram != null)
         {
-            for(MapGeneration.Graph.Polygon polygon: diagram.polygons)
+            for(MapTile mapTile : diagram.polygons)
             {
-                g.setColor(polygon.biome.getBiomeColor());
+                g.setColor(mapTile.biome.getBiomeColor());
 
-                for(Point pixel:polygon.polygonPixels)
+                for(Point pixel: mapTile.polygonPixels)
                 {
                     g.drawRect(pixel.getX(),pixel.getY(),1,1);
                 }
             }
-            for(MapGeneration.Graph.Polygon polygon: diagram.polygons)
+            for(MapTile mapTile : diagram.polygons)
             {
                 g.setColor(Color.BLUE);
-                if(polygon.river == true && !(polygon.biome instanceof Glacier))
+                if(mapTile.river == true && !(mapTile.biome instanceof Glacier))
                 {
-                    g.drawLine(polygon.centerPoint.getX(),polygon.centerPoint.getY(),polygon.riverDirection.centerPoint.getX(),polygon.riverDirection.centerPoint.getY());
+                    g.drawLine(mapTile.centerPoint.getX(), mapTile.centerPoint.getY(), mapTile.riverDirection.centerPoint.getX(), mapTile.riverDirection.centerPoint.getY());
                 }
                 g.setColor(Color.BLACK);
-                if(polygon.city != null)
+                if(mapTile.city != null)
                 {
-                    Ellipse2D.Double circle = new Ellipse2D.Double(polygon.centerPoint.getX(), polygon.centerPoint.getY(), 6, 6);
+                    Ellipse2D.Double circle = new Ellipse2D.Double(mapTile.centerPoint.getX(), mapTile.centerPoint.getY(), 6, 6);
                     Graphics2D g2d = (Graphics2D)g;
                     g2d.fill(circle);
-                    g2d.drawString(polygon.city.toString(),polygon.centerPoint.getX(), polygon.centerPoint.getY());
+                    g2d.drawString(mapTile.city.toString(), mapTile.centerPoint.getX(), mapTile.centerPoint.getY());
                 }
             }
 

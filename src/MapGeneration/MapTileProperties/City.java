@@ -1,4 +1,4 @@
-package MapGeneration.Graph.PolygonProperties;
+package MapGeneration.MapTileProperties;
 
 /**
  * Created by Phoenicia on 12.02.2017.
